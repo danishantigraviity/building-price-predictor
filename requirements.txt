@@ -11,3 +11,4 @@ fpdf2
 Flask-JWT-Extended==4.5.3
 flask-cors
 Pillow
+gunicorn

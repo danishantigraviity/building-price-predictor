@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: building-price-predictor
+    env: python
+    buildCommand: "npm install --prefix client && npm run build --prefix client && pip install -r requirements.txt"
+    startCommand: "gunicorn wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.1
+      - key: NODE_VERSION
+        value: 20.x
+      - key: DATABASE_URL
+        value: sqlite:///instance/site.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
