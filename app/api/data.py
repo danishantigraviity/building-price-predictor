@@ -5,7 +5,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..cost_model import load_models, compute_cost_breakdown, load_unit_costs
 from ..blueprint_features import extract_blueprint_features
 from ..utils import send_email, generate_pdf
-import pandas as pd
 import json
 import os
 import io
@@ -91,21 +90,21 @@ def estimate():
         if wall_override and wall_override != '':
             feats["wall_length_ft"] = float(wall_override)
         
-        X = pd.DataFrame([{
+        input_data = {
             "city": city,
             "quality": quality,
             "area_sqft": feats["area_sqft_estimate"],
-            "no_of_floors": floors, # Model expects no_of_floors
-        }])
+            "no_of_floors": floors,
+        }
 
         if qty_model and total_cost_model:
-            # Predict quantities using just area_sqft as expected by QuantityModel.predict
-            q = qty_model.predict(X)[0]
+            # Predict quantities
+            q = qty_model.predict(input_data)[0]
             qty_cols = ["bricks_count","cement_bags","steel_kg","paint_liters","worker_days"]
             qty_pred = dict(zip(qty_cols, [int(round(max(0, v))) for v in q]))
             
             cost_res = compute_cost_breakdown(qty_pred, city, quality, unit_costs)
-            total_predicted = max(0, total_cost_model.predict(X)[0])
+            total_predicted = max(0, total_cost_model.predict_total_cost(input_data)[0])
             
             inflation = current_app.config.get('INFLATION_RATE', 0.07)
             years_diff = 2026 - datetime.now().year
