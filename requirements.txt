@@ -5,10 +5,8 @@ Flask-Login==0.6.3
 Flask-WTF==1.2.1
 Flask-Mail==0.9.1
 email_validator==2.1.0.post1
-numpy
 pymysql
 python-dotenv
-opencv-python-headless
 fpdf2
 Flask-JWT-Extended==4.5.3
 flask-cors
