@@ -33,20 +33,20 @@ This guide outlines the steps to deploy your **Building Price Predictor** projec
     import os
 
     # Your username and project folder
-    path = '/home/YOUR_USERNAME/building-price-predictor'
+    path = '/home/danishappu33/building-price-predictor'
     if path not in sys.path:
         sys.path.insert(0, path)
 
     from app import app as application
     ```
-    - Replace `YOUR_USERNAME` with your PythonAnywhere username. Click **Save**.
+    - Click **Save**.
 
 ## 4. Environment Variables & Virtualenv
 1.  **Virtualenv Path**: Back on the "Web" tab, go to the "Virtualenv" section and enter:
-    `/home/YOUR_USERNAME/.virtualenvs/building-price-env`
+    `/home/danishappu33/.virtualenvs/building-price-env`
 2.  **Static Files**: Go to the "Static Files" section and add:
     - **URL**: `/`
-    - **Path**: `/home/YOUR_USERNAME/building-price-predictor/client/dist`
+    - **Path**: `/home/danishappu33/building-price-predictor/client/dist`
 
 ## 5. Reload & Verify
 1.  Click the big green **"Reload"** button at the top of the Web tab.
