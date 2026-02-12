@@ -1,16 +1,14 @@
-import os
-import secrets
-from PIL import Image
-from flask import render_template, url_for, flash, redirect, request, Blueprint, abort
-from . import app, db, bcrypt
-from .forms import RegistrationForm, LoginForm, EstimationForm, UpdateAccountForm
+from flask import render_template, url_for, flash, redirect, request, Blueprint, abort, current_app, send_from_directory
 from .models import User, Estimation, Prediction
 from flask_login import login_user, current_user, logout_user, login_required
 from .cost_model import load_models, compute_cost_breakdown, load_unit_costs
 from .blueprint_features import extract_blueprint_features
 from .utils import send_email, generate_pdf
 import json
+import os
 from datetime import datetime
+
+main_bp = Blueprint('main', __name__)
 
 # Define routes directly on app for simplicity, or use Blueprint if preferring modularity.
 # Given the size, defining on app or using a 'main' blueprint is fine.
@@ -45,19 +43,16 @@ def get_unit_costs():
 
 from flask import send_from_directory
 
-@app.route("/", defaults={'path': ''})
-@app.route("/<path:path>")
+@main_bp.route("/", defaults={'path': ''})
+@main_bp.route("/<path:path>")
 def serve(path):
     if path.startswith("api"):
          return abort(404)
 
-    # Let Flask's static handler handle files first.
-    # If the path exists in static_folder, Flask usually handles it via /static_url_path.
-    # But since we set static_url_path='/', it might conflict with this route.
-    # However, defined routes take precedence.
+    static_folder = current_app.static_folder
     
-    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
-        return send_from_directory(app.static_folder, path)
+    if path != "" and os.path.exists(os.path.join(static_folder, path)):
+        return send_from_directory(static_folder, path)
         
-    return send_from_directory(app.static_folder, 'index.html')
+    return send_from_directory(static_folder, 'index.html')
 

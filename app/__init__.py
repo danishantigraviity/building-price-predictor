@@ -34,13 +34,12 @@ def inject_now():
 from .api.auth import auth_bp
 from .api.data import data_bp
 from .api.admin import admin_bp
+from .routes import main_bp
 
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(data_bp, url_prefix='/api/data')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
-
-# Import routes last
-from . import routes
+app.register_blueprint(main_bp)
 
 # Ensure database exists
 try:
