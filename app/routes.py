@@ -9,7 +9,6 @@ from flask_login import login_user, current_user, logout_user, login_required
 from .cost_model import load_models, compute_cost_breakdown, load_unit_costs
 from .blueprint_features import extract_blueprint_features
 from .utils import send_email, generate_pdf
-import pandas as pd
 import json
 from datetime import datetime
 

@@ -38,3 +38,6 @@ from .api.admin import admin_bp
 app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(data_bp, url_prefix='/api/data')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
+
+with app.app_context():
+    db.create_all()
