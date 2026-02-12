@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 text-center">
+        <h2 class="text-white">Estimation Results</h2>
+        <p class="text-light text-opacity-75">Generated on {{ prediction.created_at.strftime('%B %d, %Y') }}</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <!-- Total Cost Card -->
+    <div class="col-md-6">
+        <div class="glass-card text-center h-100 border-success">
+            <h5 class="text-light mb-2">Current Estimated Cost</h5>
+            <h1 class="display-3 fw-bold text-white mb-0">Rs. {{ prediction.total_cost|round(0) }}</h1>
+            <span class="badge bg-success mt-3 px-3 py-2 rounded-pill">Today's Market Rate</span>
+        </div>
+    </div>
+
+    <!-- 2026 Forecast Card -->
+    <div class="col-md-6">
+        <div class="glass-card text-center h-100 border-warning position-relative overflow-hidden">
+            <div class="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 fw-bold fs-7 rounded-bottom-start">
+                FUTURE</div>
+            <h5 class="text-light mb-2">2026 Price Forecast</h5>
+            <h1 class="display-3 fw-bold text-warning mb-0">Rs. {{ prediction.predicted_2026_cost|round(0) }}</h1>
+            <p class="text-light text-opacity-75 mt-3 mb-0">
+                <i class="fas fa-arrow-trend-up text-danger me-1"></i> Inflation Adjusted Projection
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Material Quantities -->
+    <div class="col-lg-6">
+        <div class="glass-card h-100">
+            <h4 class="text-accent border-bottom border-secondary pb-2 mb-4">Material Quantities</h4>
+            <div class="row g-3">
+                {% for material, qty in quantities.items() %}
+                <div class="col-sm-6">
+                    <div class="p-3 rounded"
+                        style="background: rgba(255,255,255,0.05); border: 1:px solid rgba(255,255,255,0.1);">
+                        <small class="text-uppercase text-white-50 d-block mb-1">{{ material|replace('_', ' ')|title
+                            }}</small>
+                        <h4 class="mb-0 text-white fw-bold">{{ qty }}</h4>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Cost Breakdown -->
+    <div class="col-lg-6">
+        <div class="glass-card h-100">
+            <h4 class="text-accent border-bottom border-secondary pb-2 mb-4">Cost Breakdown (Est.)</h4>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-borderless mb-0" style="background: transparent;">
+                    <tbody>
+                        {% for item, cost in breakdown.items() %}
+                        <tr class="border-bottom border-secondary">
+                            <td class="text-light text-capitalize py-3">{{ item }}</td>
+                            <td class="text-end fw-bold text-white py-3">Rs. {{ cost|round(2) }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr>
+                            <td class="text-success fw-bold py-3 fs-5">TOTAL</td>
+                            <td class="text-end text-success fw-bold py-3 fs-5">Rs. {{ prediction.total_cost|round(2) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12 text-center">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light px-4 me-2"><i
+                class="fas fa-arrow-left me-2"></i>Back to Dashboard</a>
+        <button class="btn btn-primary px-4" onclick="window.print()"><i class="fas fa-print me-2"></i>Print
+            Report</button>
+        <p class="mt-3 text-light text-opacity-50 small"><i class="fas fa-check-circle text-success me-1"></i> A copy of
+            this report has been sent to your email.</p>
+    </div>
+</div>
+{% endblock %}

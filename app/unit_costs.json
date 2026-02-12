@@ -1,0 +1,26 @@
+{
+  "base": {
+    "brick_per_1000": 6500,
+    "cement_bag": 380,
+    "steel_kg": 78,
+    "paint_liter": 260,
+    "labor_day": 1000
+  },
+  "city_multiplier": {
+    "Chennai": 1.00,
+    "Bengaluru": 1.05,
+    "Mumbai": 1.15,
+    "Delhi": 1.08,
+    "Hyderabad": 1.03,
+    "Kolkata": 0.98,
+    "Pune": 1.02,
+    "Ahmedabad": 0.96,
+    "Jaipur": 0.94,
+    "Coimbatore": 0.92
+  },
+  "quality_multiplier": {
+    "basic": 0.92,
+    "standard": 1.00,
+    "premium": 1.18
+  }
+}

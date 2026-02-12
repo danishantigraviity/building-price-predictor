@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2 class="text-white mb-3">Dashboard</h2>
+        <p class="text-light text-opacity-75">Welcome back, {{ current_user.username }}!</p>
+    </div>
+</div>
+
+<div class="row mb-5 g-4">
+    <div class="col-md-4">
+        <div class="glass-card hover-up">
+            <h5 class="text-accent mb-3">Total Estimations</h5>
+            <div class="d-flex align-items-center justify-content-between">
+                <h2 class="display-4 fw-bold text-white mb-0">{{ estimations|length }}</h2>
+                <i class="fas fa-list-alt fa-3x text-white opacity-25"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card hover-up">
+            <h5 class="text-success mb-3">Total Projected Value</h5>
+            <div class="d-flex align-items-center justify-content-between">
+                <h2 class="fw-bold text-white mb-0">Rs. {{ total_value|round(2) }}</h2>
+                <i class="fas fa-rupee-sign fa-3x text-white opacity-25"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card hover-up text-center d-flex flex-column justify-content-center">
+            <a href="{{ url_for('estimate') }}" class="btn btn-primary btn-lg stretched-link">
+                <i class="fas fa-plus-circle me-2"></i> New Estimation
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card">
+    <h4 class="text-white mb-4"><i class="fas fa-history me-2"></i>Recent Estimations</h4>
+    {% if estimations %}
+    <div class="table-responsive">
+        <table class="table table-dark table-hover table-borderless align-middle mb-0" style="background: transparent;">
+            <thead class="text-accent border-bottom border-secondary">
+                <tr>
+                    <th>Date</th>
+                    <th>City</th>
+                    <th>Project Details</th>
+                    <th>Total Cost</th>
+                    <th>2026 Forecast</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for est in estimations %}
+                <tr>
+                    <td>{{ est.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ est.inputs_json.city }}</td>
+                    <td>
+                        <small class="d-block text-white-50">{{ est.inputs_json.area_sqft_estimate }} sqft</small>
+                        <small class="d-block text-white-50">{{ est.inputs_json.floors }} Floors</small>
+                    </td>
+                    <td class="fw-bold text-white">Rs. {{ est.total_cost|round(0) }}</td>
+                    <td class="text-warning">Rs. {{ est.predicted_2026_cost|round(0) }}</td>
+                    <td>
+                        <a href="{{ url_for('result', pred_id=est.id) }}" class="btn btn-sm btn-outline-info">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-folder-open fa-3x text-white opacity-25 mb-3"></i>
+        <p class="text-light text-opacity-75">No estimations yet. Start your first project!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+/* Global Styles */
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: dark;
+  color: #e0e0e0;
+  background-color: #0f172a;
+  --primary-color: #3f51b5;
+  --secondary-color: #94a3b8;
+  --card-bg: rgba(30, 41, 59, 0.7);
+  --input-bg: rgba(15, 23, 42, 0.6);
+  --text-primary: #e2e8f0;
+  --text-muted: #94a3b8;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #0f172a;
+  background-attachment: fixed;
+  color: #e2e8f0;
+}
+
+a {
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+/* Glassmorphism Card */
+.glass-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary);
+}
+
+.glass-input {
+  background: var(--input-bg) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+}
+
+.glass-input:focus {
+  background: rgba(15, 23, 42, 0.8) !important;
+  box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f51b5;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #303f9f;
+}

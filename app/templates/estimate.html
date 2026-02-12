@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="glass-card p-4 p-md-5">
+            <div class="text-center mb-5">
+                <h2 class="text-white">New Project Estimation</h2>
+                <p class="text-light text-opacity-75">Enter project details or upload a blueprint to get started.</p>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data" id="estimationForm">
+                {{ form.hidden_tag() }}
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="text-accent border-bottom border-secondary pb-2 mb-3">Project Location & Specs</h5>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.city.label(class="form-label") }}
+                        {{ form.city(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.quality.label(class="form-label") }}
+                        {{ form.quality(class="form-control") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.area_sqft.label(class="form-label") }}
+                        {{ form.area_sqft(class="form-control", placeholder="Optional if blueprint uploaded") }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        {{ form.floors.label(class="form-label") }}
+                        {{ form.floors(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="text-accent border-bottom border-secondary pb-2 mb-3">Blueprint Analysis</h5>
+                    </div>
+                    <div class="col-12 mb-3">
+                        {{ form.blueprint.label(class="form-label") }}
+                        <div class="input-group">
+                            {{ form.blueprint(class="form-control") }}
+                            <span class="input-group-text bg-secondary border-secondary text-white"><i
+                                    class="fas fa-upload"></i></span>
+                        </div>
+                        <small class="text-light text-opacity-50">Upload a floor plan image (JPG, PNG) to auto-calculate
+                            area and rooms.</small>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="text-accent border-bottom border-secondary pb-2 mb-3">Additional Details</h5>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check form-switch">
+                            {{ form.is_commercial(class="form-check-input") }}
+                            {{ form.is_commercial.label(class="form-check-label text-light") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid mt-4">
+                    {{ form.submit(class="btn btn-primary btn-lg", onclick="showLoader()") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Loader Overlay -->
+<div id="loader"
+    class="d-none position-fixed top-0 start-0 w-100 h-100 flex-column justify-content-center align-items-center"
+    style="background: rgba(0,0,0,0.8); z-index: 9999; backdrop-filter: blur(5px);">
+    <div class="spinner-border text-accent mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+    <h4 class="text-white">Analyzing Blueprint & Predicting Costs...</h4>
+</div>
+
+<script>
+    function showLoader() {
+        document.getElementById('loader').classList.remove('d-none');
+        document.getElementById('loader').classList.add('d-flex');
+    }
+</script>
+{% endblock %}

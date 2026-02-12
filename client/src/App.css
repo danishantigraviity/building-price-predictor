@@ -1,0 +1,81 @@
+/* App specific styles */
+
+.card {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border-radius: 16px;
+  /* More rounded */
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  color: var(--text-primary);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn {
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 6px rgba(63, 81, 181, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: #303f9f;
+  border-color: #303f9f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(63, 81, 181, 0.4);
+}
+
+.form-control {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background-color: var(--input-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-control:focus {
+  background-color: rgba(15, 23, 42, 0.8);
+  border-color: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.form-select {
+  background-color: var(--input-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.form-select:focus {
+  background-color: rgba(15, 23, 42, 0.8);
+  border-color: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 0 0 0.25rem rgba(63, 81, 181, 0.25);
+}
+
+.navbar {
+  backdrop-filter: blur(10px);
+  background-color: rgba(33, 37, 41, 0.95) !important;
+  /* Semi-transparent dark */
+}
+
+.nav-link {
+  font-weight: 500;
+}
