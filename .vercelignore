@@ -1,0 +1,15 @@
+# Vercel Ignore
+node_modules
+venv
+.venv
+__pycache__
+*.pyc
+.git
+.github
+client/node_modules
+client/dist
+building-price-predictor
+building-price-predictor/venv
+instance/*.db
+*.bak
+*.tmp
