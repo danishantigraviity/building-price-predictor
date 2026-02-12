@@ -3,7 +3,11 @@ import os
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev-key-please-change'
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or 'jwt-secret-string'
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:////tmp/site.db'
+    # Database: Use /tmp for Vercel (read-only), but persistent path for others like PythonAnywhere
+    if os.environ.get('VERCEL'):
+         SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:////tmp/site.db'
+    else:
+         SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or f"sqlite:///{os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'site.db')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
     # 2026 Prediction Config
