@@ -8,12 +8,6 @@ const Profile = () => {
     const [email, setEmail] = useState(user?.email || '');
     const [message, setMessage] = useState({ type: '', text: '' });
 
-    useEffect(() => {
-        if (user) {
-            setUsername(user.username);
-            setEmail(user.email);
-        }
-    }, [user]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();

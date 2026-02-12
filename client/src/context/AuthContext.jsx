@@ -3,7 +3,9 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
+const useAuth = () => useContext(AuthContext);
+
+export { useAuth };
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -21,6 +23,16 @@ export const AuthProvider = ({ children }) => {
         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
+    const logout = () => {
+        localStorage.removeItem('token');
+        setToken(null);
+        setUser(null);
+        // Using a safe check before deletion
+        if (api.defaults.headers.common['Authorization']) {
+            delete api.defaults.headers.common['Authorization'];
+        }
+    };
+
     useEffect(() => {
         const loadUser = async () => {
             if (token) {
@@ -35,7 +47,7 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
         };
         loadUser();
-    }, [token]);
+    }, [token, api]); // Include api in dependencies
 
     const login = async (email, password) => {
         const res = await api.post('/auth/login', { email, password });
@@ -55,12 +67,6 @@ export const AuthProvider = ({ children }) => {
         return user;
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
-        delete api.defaults.headers.common['Authorization'];
-    };
 
     const updateProfile = async (data) => {
         const res = await api.put('/auth/update', data);
