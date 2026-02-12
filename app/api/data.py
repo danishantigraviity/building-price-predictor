@@ -15,15 +15,28 @@ data_bp = Blueprint('data_api', __name__)
 
 # Load Models (Lazy load or simple global if context allows, but safe inside request or try block)
 # To avoid issues, let's load them global but resiliently.
-try:
-    qty_model, total_cost_model = load_models()
-    unit_costs = load_unit_costs()
-except Exception as e:
-    print(f"Model load error: {e}")
-    MODEL_LOAD_ERROR = str(e)
-    qty_model = None
-    total_cost_model = None
-    unit_costs = {}
+# Deferred loading
+_QTY_MODEL = None
+_TOTAL_COST_MODEL = None
+_UNIT_COSTS = None
+
+def get_data_models():
+    global _QTY_MODEL, _TOTAL_COST_MODEL
+    if _QTY_MODEL is None:
+        try:
+            _QTY_MODEL, _TOTAL_COST_MODEL = load_models()
+        except:
+            pass
+    return _QTY_MODEL, _TOTAL_COST_MODEL
+
+def get_data_unit_costs():
+    global _UNIT_COSTS
+    if _UNIT_COSTS is None:
+        try:
+            _UNIT_COSTS = load_unit_costs()
+        except:
+            _UNIT_COSTS = {}
+    return _UNIT_COSTS
 
 @data_bp.route('/dashboard', methods=['GET'])
 @jwt_required()
@@ -97,14 +110,17 @@ def estimate():
             "no_of_floors": floors,
         }
 
-        if qty_model and total_cost_model:
+        q_model, t_model = get_data_models()
+        u_costs = get_data_unit_costs()
+
+        if q_model and t_model:
             # Predict quantities
-            q = qty_model.predict(input_data)[0]
+            q = q_model.predict(input_data)[0]
             qty_cols = ["bricks_count","cement_bags","steel_kg","paint_liters","worker_days"]
             qty_pred = dict(zip(qty_cols, [int(round(max(0, v))) for v in q]))
             
-            cost_res = compute_cost_breakdown(qty_pred, city, quality, unit_costs)
-            total_predicted = max(0, total_cost_model.predict_total_cost(input_data)[0])
+            cost_res = compute_cost_breakdown(qty_pred, city, quality, u_costs)
+            total_predicted = max(0, t_model.predict_total_cost(input_data)[0])
             
             inflation = current_app.config.get('INFLATION_RATE', 0.07)
             years_diff = 2026 - datetime.now().year

@@ -30,7 +30,7 @@ def inject_now():
     from datetime import datetime
     return {'now': datetime.utcnow()}
 
-from . import routes
+# Avoid circular imports by importing inside function or after app is ready
 from .api.auth import auth_bp
 from .api.data import data_bp
 from .api.admin import admin_bp
@@ -39,5 +39,12 @@ app.register_blueprint(auth_bp, url_prefix='/api/auth')
 app.register_blueprint(data_bp, url_prefix='/api/data')
 app.register_blueprint(admin_bp, url_prefix='/api/admin')
 
-with app.app_context():
-    db.create_all()
+# Import routes last
+from . import routes
+
+# Ensure database exists
+try:
+    with app.app_context():
+        db.create_all()
+except Exception as e:
+    print(f"DB Creation Warning: {e}")

@@ -2,11 +2,12 @@ import os
 import threading
 from flask import render_template, current_app
 from flask_mail import Message
-from app import mail
+# from app import mail  # Moved to local imports to avoid circular dependency
 from fpdf import FPDF
 from io import BytesIO
 
 def send_async_email(app, msg):
+    from . import mail # Local import
     with app.app_context():
         try:
             mail.send(msg)

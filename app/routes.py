@@ -17,15 +17,31 @@ from datetime import datetime
 # Let's use app.route for now as __init__.py didn't set up blueprints yet, or I can update it.
 # I'll use app.route to keep it simple as per the __init__ structure I created.
 
-# Load ML models once
-try:
-    qty_model, total_cost_model = load_models()
-    unit_costs = load_unit_costs(os.path.join(app.root_path, 'unit_costs.json'))
-except Exception as e:
-    print(f"Error loading models: {e}")
-    qty_model = None
-    total_cost_model = None
-    unit_costs = {}
+# Deferred loading of models to avoid crashes during initialization
+_QTY_MODEL = None
+_TOTAL_COST_MODEL = None
+_UNIT_COSTS = None
+
+def get_models():
+    global _QTY_MODEL, _TOTAL_COST_MODEL, _UNIT_COSTS
+    if _QTY_MODEL is None or _TOTAL_COST_MODEL is None:
+        try:
+            _QTY_MODEL, _TOTAL_COST_MODEL = load_models()
+        except Exception as e:
+            print(f"Error loading models: {e}")
+    return _QTY_MODEL, _TOTAL_COST_MODEL
+
+def get_unit_costs():
+    global _UNIT_COSTS
+    if _UNIT_COSTS is None:
+        try:
+            # Look for unit_costs.json in app root path
+            path = os.path.join(os.path.dirname(__file__), 'unit_costs.json')
+            _UNIT_COSTS = load_unit_costs(path)
+        except Exception as e:
+            print(f"Error loading unit costs: {e}")
+            _UNIT_COSTS = {}
+    return _UNIT_COSTS
 
 from flask import send_from_directory
 
