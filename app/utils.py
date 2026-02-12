@@ -3,11 +3,7 @@ import threading
 from flask import render_template, current_app
 from flask_mail import Message
 from app import mail
-from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.units import mm
-from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from fpdf import FPDF
 from io import BytesIO
 
 def send_async_email(app, msg):
@@ -36,109 +32,99 @@ def send_email(subject, recipient, template=None, body=None, pdf_bytes=None, pdf
 
 def generate_pdf(data):
     """
-    Generates a professional PDF report using ReportLab.
-    data format:
-    {
-        'user': {'name': str, 'email': str},
-        'date': str,
-        'id': int,
-        'inputs': dict,
-        'quantities': dict,
-        'breakdown': dict,
-        'total': float,
-        'predicted_2026': float
-    }
+    Generates a professional PDF report using FPDF2 (pure Python).
     """
-    buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=20*mm, leftMargin=20*mm, topMargin=20*mm, bottomMargin=20*mm)
-    
-    styles = getSampleStyleSheet()
-    title_style = ParagraphStyle('Title', parent=styles['Heading1'], fontSize=24, textColor=colors.HexColor("#2c3e50"), spaceAfter=20)
-    normal_style = styles["BodyText"]
-    bold_style = ParagraphStyle('Bold', parent=styles['BodyText'], fontName='Helvetica-Bold')
-    
-    elements = []
-    
-    # Header
-    elements.append(Paragraph("Building Cost Estimate", title_style))
-    elements.append(Paragraph(f"<b>Date:</b> {data['date']}", normal_style))
-    elements.append(Paragraph(f"<b>Estimator ID:</b> #{data['id']}", normal_style))
-    elements.append(Paragraph(f"<b>Client:</b> {data['user']['name']} ({data['user']['email']})", normal_style))
-    elements.append(Spacer(1, 10*mm))
-    
-    # Project Specs Table
-    elements.append(Paragraph("Project Specifications", styles['Heading3']))
-    inputs_data = [
-        ["City", data['inputs'].get('city', 'N/A')],
-        ["Quality", data['inputs'].get('quality', 'N/A')],
-        ["Floors", data['inputs'].get('floors', 'N/A')],
-        ["Area (sqft)", f"{data['inputs'].get('area_sqft_estimate', 'N/A')}"]
-    ]
-    t_inputs = Table(inputs_data, colWidths=[60*mm, 100*mm])
-    t_inputs.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (0,-1), colors.HexColor("#ecf0f1")),
-        ('TEXTCOLOR', (0,0), (-1,-1), colors.black),
-        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
-        ('FONTNAME', (0,0), (0,-1), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 8),
-        ('TOPPADDING', (0,0), (-1,-1), 8),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.grey)
-    ]))
-    elements.append(t_inputs)
-    elements.append(Spacer(1, 10*mm))
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Helvetica", size=12)
 
-    # Quantities & Costs Table
-    elements.append(Paragraph("Material Breakdown", styles['Heading3']))
+    # Title
+    pdf.set_font("Helvetica", "B", 24)
+    pdf.set_text_color(44, 62, 80)
+    pdf.cell(0, 20, "Building Cost Estimate", ln=True, align="C")
+    pdf.ln(10)
+
+    # Header Info
+    pdf.set_font("Helvetica", size=10)
+    pdf.set_text_color(0, 0, 0)
+    pdf.write_html(f"<b>Date:</b> {data['date']}<br>")
+    pdf.write_html(f"<b>Estimator ID:</b> #{data['id']}<br>")
+    pdf.write_html(f"<b>Client:</b> {data['user']['name']} ({data['user']['email']})<br>")
+    pdf.ln(10)
+
+    # Project Specifications Table
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 10, "Project Specifications", ln=True)
+    pdf.set_font("Helvetica", size=10)
     
-    bill_data = [["Material", "Quantity", "Estimated Cost (INR)"]]
+    with pdf.table(col_widths=(60, 120), line_height=7) as table:
+        row = table.row()
+        row.cell("City")
+        row.cell(data['inputs'].get('city', 'N/A'))
+        row = table.row()
+        row.cell("Quality")
+        row.cell(data['inputs'].get('quality', 'N/A'))
+        row = table.row()
+        row.cell("Floors")
+        row.cell(str(data['inputs'].get('floors', 'N/A')))
+        row = table.row()
+        row.cell("Area (sqft)")
+        row.cell(str(data['inputs'].get('area_sqft_estimate', 'N/A')))
     
-    # Map keys to display names
-    key_map = {
-        'bricks': 'Bricks', 'cement': 'Cement', 'steel': 'Steel', 'paint': 'Paint', 'labor': 'Labor'
-    }
+    pdf.ln(10)
+
+    # Material Breakdown Table
+    pdf.set_font("Helvetica", "B", 14)
+    pdf.cell(0, 10, "Material Breakdown", ln=True)
+    pdf.set_font("Helvetica", size=10)
     
-    # Assuming quantities and breakdown keys align roughly or we map them
-    # Let's just list cost breakdown items
-    total_est = 0
-    for k, cost in data['breakdown'].items():
-        name = key_map.get(k, k.capitalize())
-        # Try to find qty
-        qty_val = "-"
-        if k == 'bricks': qty_val = f"{data['quantities'].get('bricks_count', 0):,.0f} Units"
-        elif k == 'cement': qty_val = f"{data['quantities'].get('cement_bags', 0):,.0f} Bags"
-        elif k == 'steel': qty_val = f"{data['quantities'].get('steel_kg', 0):,.0f} Kg"
-        elif k == 'paint': qty_val = f"{data['quantities'].get('paint_liters', 0):,.0f} L"
-        elif k == 'labor': qty_val = f"{data['quantities'].get('worker_days', 0):,.0f} Days"
-        
-        bill_data.append([name, qty_val, f"Rs. {cost:,.2f}"])
-        total_est += cost
-        
-    bill_data.append(["TOTAL ESTIMATE", "", f"Rs. {data['total']:,.2f}"])
+    bill_data = [("Material", "Quantity", "Estimated Cost (INR)")]
+    key_map = {'bricks': 'Bricks', 'cement': 'Cement', 'steel': 'Steel', 'paint': 'Paint', 'labor': 'Labor'}
     
-    t_bill = Table(bill_data, colWidths=[60*mm, 60*mm, 40*mm])
-    t_bill.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.HexColor("#2c3e50")),
-        ('TEXTCOLOR', (0,0), (-1,0), colors.whitesmoke),
-        ('ALIGN', (0,0), (-1,-1), 'CENTER'),
-        ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
-        ('BOTTOMPADDING', (0,0), (-1,0), 12),
-        ('BACKGROUND', (0,-1), (-1,-1), colors.HexColor("#dff9fb")),
-        ('FONTNAME', (0,-1), (-1,-1), 'Helvetica-Bold'),
-        ('GRID', (0,0), (-1,-1), 1, colors.black)
-    ]))
-    elements.append(t_bill)
-    elements.append(Spacer(1, 10*mm))
-    
+    with pdf.table(col_widths=(60, 60, 60), line_height=8, text_align="CENTER") as table:
+        # Header
+        row = table.row()
+        for cell in bill_data[0]:
+            row.cell(cell)
+            
+        for k, cost in data['breakdown'].items():
+            name = key_map.get(k, k.capitalize())
+            qty_val = "-"
+            if k == 'bricks': qty_val = f"{data['quantities'].get('bricks_count', 0):,.0f} Units"
+            elif k == 'cement': qty_val = f"{data['quantities'].get('cement_bags', 0):,.0f} Bags"
+            elif k == 'steel': qty_val = f"{data['quantities'].get('steel_kg', 0):,.0f} Kg"
+            elif k == 'paint': qty_val = f"{data['quantities'].get('paint_liters', 0):,.0f} L"
+            elif k == 'labor': qty_val = f"{data['quantities'].get('worker_days', 0):,.0f} Days"
+            
+            row = table.row()
+            row.cell(name)
+            row.cell(qty_val)
+            row.cell(f"Rs. {cost:,.2f}")
+            
+        # Total
+        row = table.row()
+        row.cell("TOTAL ESTIMATE", colspan=2)
+        row.cell(f"Rs. {data['total']:,.2f}")
+
+    pdf.ln(10)
+
     # Future Prediction
     if data.get('predicted_2026'):
-        elements.append(Paragraph("Future Price Forecast (2026)", styles['Heading3']))
+        pdf.set_font("Helvetica", "B", 14)
+        pdf.cell(0, 10, "Future Price Forecast (2026)", ln=True)
+        pdf.set_font("Helvetica", size=10)
         pred_text = f"Based on current market trends and inflation analysis, the estimated cost for this project in 2026 is approximately <b>Rs. {data['predicted_2026']:,.2f}</b>."
-        elements.append(Paragraph(pred_text, normal_style))
+        pdf.write_html(pred_text)
     
     # Footer
-    elements.append(Spacer(1, 20*mm))
-    elements.append(Paragraph("Generated by Civil Estimator AI", ParagraphStyle('Footer', parent=normal_style, alignment=1, textColor=colors.grey)))
+    pdf.set_y(-30)
+    pdf.set_font("Helvetica", "I", 8)
+    pdf.set_text_color(128, 128, 128)
+    pdf.cell(0, 10, "Generated by Civil Estimator AI", align="C")
 
-    doc.build(elements)
+    # Output to BytesIO
+    buffer = BytesIO()
+    pdf_output = pdf.output()
+    buffer.write(pdf_output)
     buffer.seek(0)
     return buffer.getvalue()
